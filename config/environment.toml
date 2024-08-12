@@ -1,6 +1,0 @@
-[mongo]
-uri = ""
-db = ""
-
-[info]
-version = "jj"
