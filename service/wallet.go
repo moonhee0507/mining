@@ -20,12 +20,26 @@ func (s *Service) newWallet() (string,string, error) {
 	} else if private == nil {
 		return "", "", errors.New("Pk is Nil")
 	} else {
-		privateKeyToBytes := crypto.FromECDSA(private)
-		fmt.Println(hexutil.Encode(privateKeyToBytes))
-		fmt.Println(privateKeyToBytes)
+		privateKeyBytes := crypto.FromECDSA(private)
+		privateKey := hexutil.Encode(privateKeyBytes)
+
+		againPrivateKey, err := crypto.HexToECDSA(privateKey[2:])
+		if err != nil {
+			return "", "", err
+		} 
+
+		cPublicKey := againPrivateKey.Public()
+		publicKeyECDSA, ok := cPublicKey.(*ecdsa.PublicKey)
+
+		if !ok {
+			return "", "", errors.New("error casting public key type")
+		}
+
+		publicKey := crypto.PubkeyToAddress(*publicKeyECDSA)
+
+		return privateKey, hexutil.Encode(publicKey[:]), nil
 	}
 
-	return "", "", nil
 }
 
 func (s *Service) MakeWallet() *types.Wallet {
